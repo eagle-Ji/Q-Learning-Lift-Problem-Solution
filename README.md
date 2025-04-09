@@ -50,16 +50,10 @@ The reward is structured as follows:
 #### **Mathematics (Reward Calculation):**
 
 - **For dropped-off passengers**: 
-  \[
-  \text{Reward} = 10 \times \text{Number of passengers dropped off}
-  \]
-  This reward is given whenever passengers are dropped off at their desired floor.
-
+  The reward is calculated as **10 times the number of passengers dropped off**. This means that for each passenger successfully dropped off at their desired floor, the agent earns 10 points.
+  
 - **For non-productive actions** (waiting or moving without dropping off passengers):
-  \[
-  \text{Penalty} = -1 \times (\text{Lift passenger count} + \text{Total passengers at all floors})
-  \]
-  This penalty discourages waiting or moving the lift unnecessarily.
+  The penalty is calculated as **negative one times the sum of the passengers currently in the lift and the total number of passengers waiting at all floors**. This penalty is meant to discourage the agent from performing unnecessary actions like waiting or moving without dropping off passengers.
 
 ---
 
@@ -70,7 +64,7 @@ The Q-learning agent follows these steps to learn the optimal policy:
 #### **Initialization:**
 
 - The Q-table is initialized with zeros for all state-action pairs.
-- The agent starts with an epsilon (\(\epsilon\)) of 1.0, meaning it will initially take random actions to explore the environment. Over time, epsilon decays, and the agent increasingly exploits the best-known actions.
+- The agent starts with an epsilon (denoted as \( \epsilon \)) of 1.0, meaning it will initially take random actions to explore the environment. Over time, epsilon decays, and the agent increasingly exploits the best-known actions.
   
 #### **For Each Episode:**
 
@@ -79,52 +73,39 @@ The Q-learning agent follows these steps to learn the optimal policy:
 
 2. **Action Selection (Epsilon-Greedy Policy):**
    The agent selects an action based on the epsilon-greedy policy:
-   - With probability \(\epsilon\), it takes a random action (exploration).
-   - With probability \(1 - \epsilon\), it takes the action that maximizes the Q-value (exploitation).
-   
-   Mathematically:
-   \[
-   \text{With probability} \, \epsilon: \, \text{Choose a random action}
-   \]
-   \[
-   \text{With probability} \, (1 - \epsilon): \, \text{Choose the action with the highest Q-value}
-   \]
+   - With probability \( \epsilon \), it takes a random action (exploration).
+   - With probability \( 1 - \epsilon \), it takes the action that maximizes the Q-value (exploitation).
 
 3. **Action Execution**:
    The chosen action is applied to the environment. The agent receives a reward and the next state is determined.
 
 4. **Q-value Update (Temporal Difference):**
    The Q-value for the current state-action pair is updated using the Temporal Difference (TD) learning formula:
-   \[
-   Q(s_t, a_t) = Q(s_t, a_t) + \alpha \left[ R_t + \gamma \cdot \max_a Q(s_{t+1}, a) - Q(s_t, a_t) \right]
-   \]
-   where:
-   - \( Q(s_t, a_t) \) is the Q-value of the state-action pair.
-   - \( R_t \) is the immediate reward received.
-   - \( \gamma \) is the discount factor (how much future rewards are considered).
-   - \( \alpha \) is the learning rate.
-   - \( \max_a Q(s_{t+1}, a) \) is the maximum Q-value for the next state.
+   - **Current Q-value**: The value of the current state-action pair before the update.
+   - **Target Q-value**: The expected future reward, calculated by taking the immediate reward from the current action and adding the maximum Q-value of the next state. 
+   
+   The Q-value update formula is:
+   - **If the episode is not done (ongoing)**: The Q-value is updated by adding the difference between the current Q-value and the target Q-value, weighted by the learning rate.
+     - **Target Q-value**: The reward from the current action, plus the discount factor multiplied by the maximum Q-value for the next state.
+   - **If the episode is done**: The Q-value is updated to be the immediate reward for reaching the terminal state.
+
+   **Mathematical Formula for Q-value Update**:
+   - **Current Q-value**: The value of the action at the current state.
+   - **Target Q-value**: The sum of the immediate reward and the future reward from the next state.
+   
+   The formula for updating the Q-value is:
+   - **Q-value Update**: 
+     - Current Q-value = Current Q-value + Learning Rate × (Target Q-value − Current Q-value)
+     - **Target Q-value**:
+       - If not done: Reward + Gamma × Max Q-value of the next state
+       - If done: Just the reward.
 
 5. **Epsilon Decay**:
    After each action, epsilon is decayed to decrease exploration over time, allowing the agent to exploit what it has learned. The decay is controlled by a decay rate:
-   \[
-   \epsilon_{t+1} = \epsilon_t - \text{decay rate}
-   \]
+   - **Epsilon Decay**: Epsilon is decreased by a fixed decay rate after each step, making the agent less likely to take random actions as it learns.
 
 6. **Reward Tracking**: 
    The cumulative reward for each episode is tracked and saved in `Reward_Data.npy`.
-
-#### **Mathematics (Q-value Update)**:
-
-The Q-value update is key to Q-learning:
-\[
-Q(s_t, a_t) = Q(s_t, a_t) + \alpha \left[ R_t + \gamma \cdot \max_a Q(s_{t+1}, a) - Q(s_t, a_t) \right]
-\]
-Where:
-- \( Q(s_t, a_t) \) is the value for taking action \(a_t\) in state \(s_t\).
-- \( R_t \) is the immediate reward after performing action \(a_t\).
-- \( \gamma \) (gamma) is the discount factor that controls how much future rewards are considered.
-- \( \alpha \) (alpha) is the learning rate, controlling how quickly new information overrides old information.
 
 ---
 
